@@ -14,16 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      anggota_keluarga: {
+        Row: {
+          created_at: string
+          hubungan: string
+          id_anggota: string
+          id_keluarga: string
+          nama: string
+          pekerjaan: string | null
+          status_jemaat: string
+          tanggal_lahir: string | null
+          tempat_lahir: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hubungan: string
+          id_anggota: string
+          id_keluarga: string
+          nama: string
+          pekerjaan?: string | null
+          status_jemaat?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hubungan?: string
+          id_anggota?: string
+          id_keluarga?: string
+          nama?: string
+          pekerjaan?: string | null
+          status_jemaat?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anggota_keluarga_id_keluarga_fkey"
+            columns: ["id_keluarga"]
+            isOneToOne: false
+            referencedRelation: "keluarga"
+            referencedColumns: ["id_keluarga"]
+          },
+        ]
+      }
+      keluarga: {
+        Row: {
+          alamat: string | null
+          created_at: string
+          id_keluarga: string
+          nama_kepala_keluarga: string
+          no_hp_kk: string | null
+          pekerjaan_kk: string | null
+          status_keluarga: string
+          tanggal_lahir: string | null
+          tempat_lahir: string | null
+          updated_at: string
+        }
+        Insert: {
+          alamat?: string | null
+          created_at?: string
+          id_keluarga: string
+          nama_kepala_keluarga: string
+          no_hp_kk?: string | null
+          pekerjaan_kk?: string | null
+          status_keluarga?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string | null
+          created_at?: string
+          id_keluarga?: string
+          nama_kepala_keluarga?: string
+          no_hp_kk?: string | null
+          pekerjaan_kk?: string | null
+          status_keluarga?: string
+          tanggal_lahir?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          id_keluarga: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          id_keluarga?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          id_keluarga?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_keluarga_fkey"
+            columns: ["id_keluarga"]
+            isOneToOne: false
+            referencedRelation: "keluarga"
+            referencedColumns: ["id_keluarga"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_family_id_for_user: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "kk"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +295,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "kk"],
+    },
   },
 } as const

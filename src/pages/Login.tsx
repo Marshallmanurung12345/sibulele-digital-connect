@@ -1,44 +1,59 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Lock, User, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Lock, User, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import heroChurch from "@/assets/hero-church.jpg";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  if (user) {
+    navigate("/dashboard");
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This will be implemented with Lovable Cloud backend later
-    console.log("Login attempt:", { username, password });
+    setIsLoading(true);
+
+    const { error } = await signIn(username, password);
+
+    if (error) {
+      toast({
+        title: "Login Gagal",
+        description: "Username atau password salah. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "Login Berhasil", description: "Selamat datang di Portal Jemaat!" });
+      navigate("/dashboard");
+    }
+    setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <img
-          src={heroChurch}
-          alt="GPdI Sibulele"
-          className="w-full h-full object-cover"
-        />
+        <img src={heroChurch} alt="GPdI Sibulele" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-primary/80 flex flex-col justify-center items-center text-center p-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="w-20 h-20 rounded-full bg-primary-foreground flex items-center justify-center mx-auto mb-6">
               <span className="text-primary font-bold text-3xl">G</span>
             </div>
-            <h1 className="text-3xl font-bold text-primary-foreground mb-4">
-              GPdI Jemaat Sibulele
-            </h1>
+            <h1 className="text-3xl font-bold text-primary-foreground mb-4">GPdI Jemaat Sibulele</h1>
             <p className="text-primary-foreground/80 text-lg max-w-md mx-auto">
               Portal Jemaat untuk mengakses informasi dan layanan gereja secara eksklusif
             </p>
@@ -49,19 +64,12 @@ const Login = () => {
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-background">
         <div className="w-full max-w-md">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8 transition-colors"
-          >
+          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8 transition-colors">
             <ArrowLeft size={20} />
             Kembali ke Beranda
           </Link>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
               <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
@@ -77,17 +85,18 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username">Nomor HP (Username)</Label>
+                <Label htmlFor="username">Nomor HP / Email Admin</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
                   <Input
                     id="username"
                     type="text"
-                    placeholder="08xxxxxxxxxx"
+                    placeholder="08xxxxxxxxxx atau admin@..."
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="pl-10 h-12"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -104,6 +113,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 h-12"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -115,15 +125,15 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full">
-                Masuk
+              <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="animate-spin" size={20} /> Memproses...</> : "Masuk"}
               </Button>
             </form>
 
             <div className="mt-8 p-4 bg-secondary rounded-xl">
               <h3 className="font-medium text-foreground text-sm mb-2">Belum punya akun?</h3>
               <p className="text-muted-foreground text-sm">
-                Akun jemaat hanya dapat dibuat oleh Admin/Pendeta gereja. 
+                Akun jemaat hanya dapat dibuat oleh Admin/Pendeta gereja.
                 Silakan hubungi sekretariat gereja untuk mendaftarkan keluarga Anda.
               </p>
             </div>
